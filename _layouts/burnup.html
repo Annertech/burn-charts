@@ -1,0 +1,55 @@
+{% include head.html %}
+<body>
+<script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['corechart']}]}"></script>
+<div id="chart_div" style="width: 100%; height: 500px;"></div>
+
+<script type='text/javascript'>//<![CDATA[
+
+google.setOnLoadCallback(drawVisualization);
+
+function drawVisualization() {
+    // Some raw data (not necessarily accurate)
+    var data = google.visualization.arrayToDataTable([
+        [
+            {label: 'Date', type: 'string'},
+            {label: 'Total', type: 'number', role: 'data'},
+            {type: 'string', role: 'tooltip', 'p': {'html': true}},
+            {label: 'Target', type: 'number', role: 'data'}
+        ],
+        {% for burnup_hash in site.data.burnup %}{% if burnup_hash[0] == page.datafile %}
+          {% for day in burnup_hash[1] %}['{{day.date}}', {{day.running}}, '{{day.date}}: {{day.effort}} hours<br>Total: {{day.running}}', {% if forloop.first %}0{% elsif forloop.last %}{{page.target}}{% else %}null{% endif %}],{% endfor %}
+    {% endif %}{% endfor %}
+    ]);
+
+    var options = {
+        title : '{{ page.title }}: {{ page.date }}',
+        animation: {
+            duration: 1000,
+            easing: 'out',
+            "startup": true
+        },
+        vAxis: {title: 'Hours'},
+        hAxis: {title: ''},
+        seriesType: 'line',
+        interpolateNulls: 'true',
+
+        series: {
+            1: { lineDashStyle: [4, 4]}
+        },
+
+        explorer: {},
+        tooltip: {isHtml: true},
+
+    };
+
+    var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
+    chart.draw(data, options);
+}
+//]]>
+
+</script>
+
+</body>
+
+</html>
+
